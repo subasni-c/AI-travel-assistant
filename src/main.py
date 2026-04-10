@@ -4,35 +4,7 @@ from pydantic import BaseModel
 from src.ingest import ingest_pdf
 from src.vectorstores import init_qdrant, clear_qdrant
 from src.generator import generate_answer, clear_memory
-import sys
-print("Python version:", sys.version)
-print("Starting imports...")
 
-try:
-    from langchain_classic.memory import ConversationBufferMemory
-    print("✅ langchain_classic OK")
-except Exception as e:
-    print("❌ langchain_classic FAILED:", e)
-
-try:
-    from langchain_openai import ChatOpenAI
-    print("✅ langchain_openai OK")
-except Exception as e:
-    print("❌ langchain_openai FAILED:", e)
-
-try:
-    from qdrant_client import QdrantClient
-    print("✅ qdrant_client OK")
-except Exception as e:
-    print("❌ qdrant_client FAILED:", e)
-
-try:
-    from sentence_transformers import SentenceTransformer
-    print("✅ sentence_transformers OK")
-except Exception as e:
-    print("❌ sentence_transformers FAILED:", e)
-
-print("All import checks done!")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -89,3 +61,8 @@ async def clear_chat(session_id: str = "default"):
 async def clear_database():
     clear_qdrant()
     return {"message": "Database cleared. Please re-upload your PDF guides."}
+if __name__ == "__main__":
+    import uvicorn
+    import os
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run("src.main:app", host="0.0.0.0", port=port)

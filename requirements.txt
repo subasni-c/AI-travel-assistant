@@ -10,8 +10,11 @@ langchain
 langchain-core
 langchain-openai
 langchain-community
-langchain-classic
+langchain-classic==1.0.3
 langchain-text-splitters
 openai
 pymupdf
 pydantic
+sqlalchemy
+pyyaml
+langsmith

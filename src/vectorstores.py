@@ -35,7 +35,7 @@ def clear_qdrant():
     print(f"[Qdrant] Recreating collection '{COLLECTION_NAME}'...")
     client.recreate_collection(
         collection_name=COLLECTION_NAME,
-        vectors_config=VectorParams(size=384, distance=Distance.COSINE),
+        vectors_config=VectorParams(size=1536, distance=Distance.COSINE),
     )
     print(f"[Qdrant] Collection cleared and ready.")
     return client

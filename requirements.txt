@@ -1,0 +1,12 @@
+langchain
+sentence-transformers
+qdrant-client
+pymupdf
+fastapi
+uvicorn
+python-dotenv
+requests
+langchain-community
+langchain-huggingface
+langchain-openai
+python-multipart

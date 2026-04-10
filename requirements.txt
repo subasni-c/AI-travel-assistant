@@ -9,13 +9,9 @@ sentence-transformers
 langchain
 langchain-core
 langchain-openai
-langchain-huggingface
 langchain-community
 langchain-classic
 langchain-text-splitters
 openai
-transformers
-torch
-accelerate
 pymupdf
 pydantic

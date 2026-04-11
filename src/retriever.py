@@ -3,12 +3,12 @@ from src.embeddings import get_embeddings
 from src.config import COLLECTION_NAME
 from src.vectorstores import get_qdrant_client
 
-TOP_SCORE_THRESHOLD = 0.6
+TOP_SCORE_THRESHOLD = 0.70
 
 # Minimum absolute score every individual chunk must meet.
 # Prevents low-scoring chunks from a WRONG PDF sneaking in
 # just because they're within 85% of a mediocre best score.
-MIN_CHUNK_SCORE = 0.50
+MIN_CHUNK_SCORE = 0.70
 
 
 def normalize_query(query: str) -> str:

@@ -97,14 +97,22 @@ def rewrite_query(raw_query: str, chat_history_text: str) -> str:
 # ── 5. Prompts (REMOVED MORNING/AFTERNOON/EVENING FORMAT) ─
 PDF_ANSWER_SYSTEM_PROMPT = """You are an expert and friendly AI Travel Assistant.
 Use the following travel guide context to answer the user's question.
-Use the context to answer. If the context has relevant information about the
-destination, use it to construct the best possible answer.
-Only say you don't know if the destination is COMPLETELY absent from the context.
-If partial info exists, use it and fill gaps with your travel knowledge.
-When answering about multiple destinations, clearly separate each one.
+
+CRITICAL RULES:
+1. Read the user's question and identify what destination they are asking about
+2. Read the context carefully
+3. Ask yourself: "Does this context contain useful travel information about the destination the user asked about?"
+4. If YES → answer from context normally
+5. If NO, or if context is about a completely different place → respond with exactly: NO_PDF_CONTEXT
+
+IMPORTANT RULES FOR NO_PDF_CONTEXT:
+- Return ONLY the single word: NO_PDF_CONTEXT
+- No emoji, no explanation, no extra text — just: NO_PDF_CONTEXT
+- Do this ONLY when context has ZERO relevant info about what user asked
+- If context has even partial info about user's destination → use it and answer
 
 ═══════════════════════════════════════════════════════════════
-CRITICAL INSTRUCTIONS - FOLLOW EXACTLY:
+ANSWER FORMAT INSTRUCTIONS:
 ═══════════════════════════════════════════════════════════════
 
 STEP 1: IDENTIFY QUERY TYPE
@@ -129,11 +137,11 @@ IF user asks "trip with hotels"    → give itinerary AND hotels
 IF user asks "trip with price"     → give itinerary AND price
 
 WARNINGS — STRICT RULES:
-- ONLY add ⚠️ warning if user SPECIFICALLY asked for that info AND it is missing
+- ONLY add ⚠️ warning if user SPECIFICALLY asked for that info AND it is missing from context
 - If user asked ONLY "plan a trip" → NO hotel warning, NO price warning, NOTHING extra
-- If user asked "hotels" and hotels NOT in PDF → add warning
-- If user asked "price" and price NOT in PDF → add warning
-- If user did NOT ask for something → DO NOT mention it at all, not even as a warning
+- If user asked "hotels" and hotels NOT in context → add warning
+- If user asked "price" and price NOT in context → add warning
+- If user did NOT ask for something → DO NOT mention it at all
 
 STEP 3: FORMAT BEAUTIFULLY (USER-FRIENDLY!)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -156,6 +164,7 @@ FOR OTHER QUERY TYPES:
 STRICTLY FORBIDDEN:
 ❌ NEVER use "Morning:", "Afternoon:", "Evening:" labels
 ❌ NEVER give one-sentence-only activities
+❌ NEVER say "NO_PDF_CONTEXT" when you have context about the destination
 ❌ Write naturally like you're helping a friend plan their trip
 
 ═══════════════════════════════════════════════════════════════
@@ -167,8 +176,10 @@ Conversation so far:
 {{chat_history}}
 
 {language_instruction}
-"""
 
+
+IMPORTANT: If the context above contains information about the destination in the question, USE IT to create a helpful answer. Only respond "NO_PDF_CONTEXT" if the context is truly empty or about completely different destinations.
+"""
 GENERAL_ANSWER_SYSTEM_PROMPT = """You are an expert AI Travel Assistant.
 
 ⚠️ IMPORTANT: The user's question is NOT covered by uploaded PDF guides.
@@ -288,6 +299,15 @@ def generate_answer(
     )
     result = llm.invoke(formatted)
     answer = result.content.strip() if MODEL_PROVIDER == "openai" else str(result).strip()
+    if "NO_PDF_CONTEXT" in answer:
+        print(f"[Generator] LLM detected irrelevant context → asking user")
+        return {
+        "answer":          None,
+        "rewritten_query": rewritten_query,
+        "has_pdf_context": False
+    }
+
+
     memory.save_context({"input": original_query}, {"answer": answer})
     return {
         "answer":          answer,

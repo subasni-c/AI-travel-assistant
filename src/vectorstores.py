@@ -18,7 +18,7 @@ def init_qdrant():
         print(f"Creating collection '{COLLECTION_NAME}'...")
         client.recreate_collection(
             collection_name=COLLECTION_NAME,
-            vectors_config=VectorParams(size=384, distance=Distance.COSINE),
+            vectors_config=VectorParams(size=1536, distance=Distance.COSINE),
         )
 
     return client

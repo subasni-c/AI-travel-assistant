@@ -2,7 +2,8 @@ import streamlit as st
 import requests
 import uuid
 
-FASTAPI_URL = "http://localhost:8000"
+import os
+FASTAPI_URL = os.getenv("FASTAPI_URL", "http://localhost:8000")
 
 st.set_page_config(
     page_title="AI Travel Assistant",
